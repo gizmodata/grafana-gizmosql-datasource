@@ -9,6 +9,11 @@ services:
       - GIZMOSQL_USERNAME=gizmosql
       - GIZMOSQL_PASSWORD=testpassword
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "echo", "ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   grafana:
     image: grafana/grafana:latest
@@ -16,14 +21,25 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      # Plugin distribution
       - ./dist:/var/lib/grafana/plugins/gizmodata-gizmosql-datasource
+      # Provisioning configs
+      - ./provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # Sample dashboards
+      - ./dashboards:/var/lib/grafana/dashboards
+      # Persistent storage
       - grafana-storage:/var/lib/grafana
     environment:
       - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=gizmodata-gizmosql-datasource
-      - GF_LOG_LEVEL=debug
-      - GF_DATAPROXY_LOGGING=true
+      - GF_LOG_LEVEL=info
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      # Disable login form for easier testing
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     depends_on:
-      - gizmosql
+      gizmosql:
+        condition: service_started
     restart: unless-stopped
 
 volumes:

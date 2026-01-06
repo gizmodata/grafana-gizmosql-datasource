@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: GizmoSQL
+    type: gizmodata-gizmosql-datasource
+    access: proxy
+    isDefault: true
+    jsonData:
+      host: gizmosql
+      port: 31337
+      useTLS: true
+      skipTLSVerify: true
+      username: gizmosql
+    secureJsonData:
+      password: testpassword
+    editable: true
