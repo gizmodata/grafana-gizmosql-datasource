@@ -16,6 +16,10 @@ module.exports = (env, argv) => {
         type: 'amd',
       },
       clean: false, // Don't clean - we want to keep the Go binary
+      devtoolModuleFilenameTemplate: info => {
+        // Strip webpack:// prefix and plugin name for cleaner source map paths
+        return info.resourcePath;
+      },
     },
     externals: [
       'lodash',
