@@ -1,0 +1,30 @@
+services:
+  gizmosql:
+    image: gizmodata/gizmosql:latest
+    container_name: gizmosql-test
+    ports:
+      - "31337:31337"
+    environment:
+      - GIZMOSQL_LOG_LEVEL=info
+      - GIZMOSQL_USERNAME=gizmosql
+      - GIZMOSQL_PASSWORD=testpassword
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-gizmosql-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dist:/var/lib/grafana/plugins/gizmodata-gizmosql-datasource
+      - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=gizmodata-gizmosql-datasource
+      - GF_LOG_LEVEL=debug
+      - GF_DATAPROXY_LOGGING=true
+    depends_on:
+      - gizmosql
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:

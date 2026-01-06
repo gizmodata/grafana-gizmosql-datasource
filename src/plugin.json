@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "datasource",
+  "name": "GizmoSQL",
+  "id": "gizmodata-gizmosql-datasource",
+  "metrics": true,
+  "backend": true,
+  "executable": "gpx_gizmosql_datasource",
+  "alerting": true,
+  "annotations": true,
+  "logs": false,
+  "info": {
+    "description": "GizmoSQL data source plugin - connect to GizmoSQL via Arrow Flight SQL",
+    "author": {
+      "name": "GizmoData",
+      "url": "https://github.com/gizmodata"
+    },
+    "keywords": [
+      "gizmosql",
+      "arrow",
+      "flight",
+      "flightsql",
+      "duckdb",
+      "sql"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "GitHub",
+        "url": "https://github.com/gizmodata/grafana-gizmosql-source"
+      },
+      {
+        "name": "GizmoSQL",
+        "url": "https://github.com/gizmodata/gizmosql"
+      }
+    ],
+    "version": "1.0.0",
+    "updated": "2025-01-06"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=10.0.0",
+    "plugins": []
+  }
+}
