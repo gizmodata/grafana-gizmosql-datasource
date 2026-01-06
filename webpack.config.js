@@ -43,11 +43,19 @@ module.exports = (env, argv) => {
           test: /\.[tj]sx?$/,
           exclude: /node_modules/,
           use: {
-            loader: 'ts-loader',
+            loader: 'swc-loader',
             options: {
-              compilerOptions: {
-                sourceMap: true,
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: false,
+                  dynamicImport: true,
+                },
+                target: 'es2015',
+                loose: false,
               },
+              sourceMaps: true,
             },
           },
         },
@@ -74,7 +82,8 @@ module.exports = (env, argv) => {
           { from: 'src/plugin.json', to: 'plugin.json' },
           { from: 'src/img', to: 'img', noErrorOnMissing: true },
           { from: 'README.md', to: 'README.md', noErrorOnMissing: true },
-          { from: 'LICENSE', to: 'LICENSE', noErrorOnMissing: true },
+          { from: 'LICENSE', to: 'LICENSE', toType: 'file', noErrorOnMissing: true },
+          { from: 'CHANGELOG.md', to: 'CHANGELOG.md', noErrorOnMissing: true },
         ],
       }),
       new ForkTsCheckerWebpackPlugin({
