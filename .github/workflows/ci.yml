@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Check frontend types
+        run: npm run typecheck
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Test frontend
+        run: npm test
+
+      - name: Build backend (Linux amd64)
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_linux_amd64 ./pkg
+
+      - name: Build backend (Linux arm64)
+        run: |
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_linux_arm64 ./pkg
+
+      - name: Build backend (Darwin amd64)
+        run: |
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_darwin_amd64 ./pkg
+
+      - name: Build backend (Darwin arm64)
+        run: |
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_darwin_arm64 ./pkg
+
+      - name: Build backend (Windows amd64)
+        run: |
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_windows_amd64.exe ./pkg
+
+      - name: Test backend
+        run: go test -v ./...
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-dist
+          path: dist/
+          retention-days: 5
