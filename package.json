@@ -1,6 +1,6 @@
 {
   "name": "gizmodata-gizmosql-datasource",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "GizmoSQL data source plugin for Grafana",
   "scripts": {
     "build": "webpack --mode production",

@@ -1,0 +1,103 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build backend (Linux amd64)
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o dist/gpx_gizmosql_datasource_linux_amd64 ./pkg
+
+      - name: Verify source maps
+        run: |
+          echo "=== Checking source map content ==="
+          node -e "
+          const fs = require('fs');
+          const sourceMap = JSON.parse(fs.readFileSync('dist/module.js.map', 'utf8'));
+          const sources = sourceMap.sources.filter(s => s.includes('./src/'));
+          console.log('Sources in map:', sources);
+
+          for (let i = 0; i < sourceMap.sourcesContent.length; i++) {
+            const source = sourceMap.sources[i];
+            if (source.includes('./src/')) {
+              const content = sourceMap.sourcesContent[i];
+              const lines = content ? content.split('\n').length : 0;
+              console.log(source + ': ' + lines + ' lines');
+
+              // Check if it looks like TypeScript (has type annotations)
+              if (content && (content.includes(': string') || content.includes('interface ') || content.includes('<'))) {
+                console.log('  ✅ Contains TypeScript syntax');
+              } else {
+                console.log('  ❌ Missing TypeScript syntax - might be transpiled JS');
+              }
+            }
+          }
+          "
+
+      - name: Compare with source files
+        run: |
+          echo "=== Comparing embedded content with source files ==="
+          node -e "
+          const fs = require('fs');
+          const sourceMap = JSON.parse(fs.readFileSync('dist/module.js.map', 'utf8'));
+
+          const filesToCheck = [
+            { idx: 10, file: 'src/types.ts' },
+            { idx: 11, file: 'src/datasource.ts' },
+            { idx: 12, file: 'src/components/QueryEditor.tsx' },
+            { idx: 13, file: 'src/module.ts' },
+            { idx: 14, file: 'src/components/ConfigEditor.tsx' }
+          ];
+
+          let allMatch = true;
+          for (const {idx, file} of filesToCheck) {
+            const embedded = sourceMap.sourcesContent[idx] || '';
+            const actual = fs.readFileSync(file, 'utf8');
+            if (embedded === actual) {
+              console.log('✅ ' + file + ' MATCHES');
+            } else {
+              console.log('❌ ' + file + ' DIFFERS');
+              console.log('   Embedded: ' + embedded.length + ' chars, ' + embedded.split('\n').length + ' lines');
+              console.log('   Actual: ' + actual.length + ' chars, ' + actual.split('\n').length + ' lines');
+              allMatch = false;
+            }
+          }
+
+          if (!allMatch) {
+            process.exit(1);
+          }
+          "
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-build
+          path: dist/
