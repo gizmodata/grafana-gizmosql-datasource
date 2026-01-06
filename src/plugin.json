@@ -9,6 +9,7 @@
   "alerting": true,
   "annotations": true,
   "logs": false,
+  "category": "sql",
   "info": {
     "description": "GizmoSQL data source plugin - connect to GizmoSQL via Arrow Flight SQL",
     "author": {
@@ -24,9 +25,14 @@
       "sql"
     ],
     "logos": {
-      "small": "img/logo.svg",
-      "large": "img/logo.svg"
+      "small": "img/logo.png",
+      "large": "img/logo.png"
     },
+    "screenshots": [
+      { "name": "Configuration", "path": "img/screenshot-config.png" },
+      { "name": "Query Editor", "path": "img/screenshot-query.png" },
+      { "name": "Dashboard", "path": "img/screenshot-dashboard.png" }
+    ],
     "links": [
       {
         "name": "GitHub",

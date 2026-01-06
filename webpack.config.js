@@ -82,6 +82,7 @@ module.exports = (env, argv) => {
           { from: 'src/plugin.json', to: 'plugin.json' },
           { from: 'src/img', to: 'img', noErrorOnMissing: true },
           { from: 'README.md', to: 'README.md', noErrorOnMissing: true },
+          { from: 'LICENSE', to: 'LICENSE', noErrorOnMissing: true },
         ],
       }),
       new ForkTsCheckerWebpackPlugin({
