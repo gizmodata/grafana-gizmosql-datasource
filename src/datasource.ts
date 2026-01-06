@@ -64,3 +64,4 @@ export class DataSource extends DataSourceWithBackend<GizmoSQLQuery, GizmoSQLDat
     return !!query.rawSql && query.rawSql.trim().length > 0;
   }
 }
+

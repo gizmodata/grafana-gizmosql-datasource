@@ -7,3 +7,4 @@ import { GizmoSQLQuery, GizmoSQLDataSourceOptions } from './types';
 export const plugin = new DataSourcePlugin<DataSource, GizmoSQLQuery, GizmoSQLDataSourceOptions>(DataSource)
   .setConfigEditor(ConfigEditor)
   .setQueryEditor(QueryEditor);
+

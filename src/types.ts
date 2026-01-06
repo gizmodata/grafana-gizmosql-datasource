@@ -34,3 +34,4 @@ export interface GizmoSQLSecureJsonData {
   password?: string;
   token?: string;
 }
+

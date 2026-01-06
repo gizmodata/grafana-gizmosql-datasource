@@ -7,7 +7,7 @@ module.exports = (env, argv) => {
 
   return {
     mode: isProduction ? 'production' : 'development',
-    devtool: isProduction ? 'nosources-source-map' : 'eval-source-map',
+    devtool: isProduction ? 'source-map' : 'eval-source-map',
     entry: './src/module.ts',
     output: {
       path: path.resolve(__dirname, 'dist'),
