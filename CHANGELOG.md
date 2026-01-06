@@ -5,6 +5,11 @@ All notable changes to the GizmoSQL Grafana Data Source Plugin will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2025-01-06
+
+### Fixed
+- Update Go module path to match repository name (grafana-gizmosql-datasource)
+
 ## [1.4.3] - 2025-01-06
 
 ### Fixed
@@ -68,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alerting support
 - Annotations support
 
+[1.4.4]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.4
 [1.4.3]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.3
 [1.4.2]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.2
 [1.4.1]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.1

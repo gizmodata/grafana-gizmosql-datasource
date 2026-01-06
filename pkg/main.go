@@ -6,7 +6,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 
-	"github.com/gizmodata/grafana-gizmosql-source/pkg/plugin"
+	"github.com/gizmodata/grafana-gizmosql-datasource/pkg/plugin"
 )
 
 func main() {

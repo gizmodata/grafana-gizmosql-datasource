@@ -1,4 +1,4 @@
-module github.com/gizmodata/grafana-gizmosql-source
+module github.com/gizmodata/grafana-gizmosql-datasource
 
 go 1.22.5
 
