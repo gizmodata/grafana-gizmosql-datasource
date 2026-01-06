@@ -43,8 +43,8 @@
         "url": "https://github.com/gizmodata/gizmosql"
       }
     ],
-    "version": "1.4.9",
-    "updated": "2025-01-06"
+    "version": "1.5.0",
+    "updated": "2026-01-06"
   },
   "dependencies": {
     "grafanaDependency": ">=10.0.0",

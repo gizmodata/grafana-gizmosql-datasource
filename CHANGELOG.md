@@ -5,6 +5,16 @@ All notable changes to the GizmoSQL Grafana Data Source Plugin will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-01-06
+
+### Changed
+- Switch to official Grafana plugin build system (grafana/plugin-actions/build-plugin)
+- Update Magefile.go to use Grafana SDK build targets
+
+### Fixed
+- Fix no-go-manifest error by using SDK build which generates go_plugin_build_manifest
+- Fix js-map-no-match error by using official Grafana build tooling
+
 ## [1.4.9] - 2025-01-06
 
 ### Fixed
@@ -99,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alerting support
 - Annotations support
 
+[1.5.0]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.5.0
 [1.4.9]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.9
 [1.4.8]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.8
 [1.4.7]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.4.7
