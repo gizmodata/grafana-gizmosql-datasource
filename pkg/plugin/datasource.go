@@ -262,6 +262,8 @@ func (d *Datasource) createColumn(dt arrow.DataType, alloc memory.Allocator) int
 		return &[]time.Time{}
 	case arrow.DATE32, arrow.DATE64:
 		return &[]time.Time{}
+	case arrow.DECIMAL128, arrow.DECIMAL256:
+		return &[]float64{}
 	default:
 		// Default to string for unknown types
 		return &[]string{}
@@ -340,6 +342,20 @@ func (d *Datasource) appendColumnData(col interface{}, arr arrow.Array) {
 		case *array.Date64:
 			if c, ok := col.(*[]time.Time); ok {
 				*c = append(*c, a.Value(i).ToTime())
+			}
+		case *array.Decimal128:
+			if c, ok := col.(*[]float64); ok {
+				// Convert Decimal128 to float64
+				val := a.Value(i)
+				scale := a.DataType().(*arrow.Decimal128Type).Scale
+				*c = append(*c, val.ToFloat64(scale))
+			}
+		case *array.Decimal256:
+			if c, ok := col.(*[]float64); ok {
+				// Convert Decimal256 to float64
+				val := a.Value(i)
+				scale := a.DataType().(*arrow.Decimal256Type).Scale
+				*c = append(*c, val.ToFloat64(scale))
 			}
 		default:
 			// Convert unknown types to string
