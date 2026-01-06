@@ -31,10 +31,20 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Update plugin.json version
+      - name: Update versions from git tag
         run: |
-          jq '.info.version = "${{ steps.version.outputs.version }}"' src/plugin.json > src/plugin.json.tmp
+          VERSION="${{ steps.version.outputs.version }}"
+          TODAY=$(date +%Y-%m-%d)
+
+          # Update plugin.json
+          jq --arg v "$VERSION" --arg d "$TODAY" '.info.version = $v | .info.updated = $d' src/plugin.json > src/plugin.json.tmp
           mv src/plugin.json.tmp src/plugin.json
+
+          # Update package.json
+          jq --arg v "$VERSION" '.version = $v' package.json > package.json.tmp
+          mv package.json.tmp package.json
+
+          echo "Updated version to $VERSION (date: $TODAY)"
 
       - name: Install frontend dependencies
         run: npm ci

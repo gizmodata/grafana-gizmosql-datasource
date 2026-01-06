@@ -30,15 +30,15 @@
     "links": [
       {
         "name": "GitHub",
-        "url": "https://github.com/gizmodata/grafana-gizmosql-source"
+        "url": "https://github.com/gizmodata/grafana-gizmosql-datasource"
       },
       {
         "name": "GizmoSQL",
         "url": "https://github.com/gizmodata/gizmosql"
       }
     ],
-    "version": "1.0.0",
-    "updated": "2025-01-06"
+    "version": "0.0.0-dev",
+    "updated": ""
   },
   "dependencies": {
     "grafanaDependency": ">=10.0.0",
