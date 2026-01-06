@@ -16,7 +16,6 @@ module.exports = (env, argv) => {
         type: 'amd',
       },
       clean: false, // Don't clean - we want to keep the Go binary
-      devtoolModuleFilenameTemplate: '[resource-path]',
     },
     externals: [
       'lodash',
