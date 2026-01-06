@@ -46,19 +46,12 @@ module.exports = (env, argv) => {
           test: /\.[tj]sx?$/,
           exclude: /node_modules/,
           use: {
-            loader: 'swc-loader',
+            loader: 'ts-loader',
             options: {
-              jsc: {
-                parser: {
-                  syntax: 'typescript',
-                  tsx: true,
-                  decorators: false,
-                  dynamicImport: true,
-                },
-                target: 'es2015',
-                loose: false,
+              compilerOptions: {
+                sourceMap: true,
+                inlineSources: true,
               },
-              sourceMaps: true,
             },
           },
         },
