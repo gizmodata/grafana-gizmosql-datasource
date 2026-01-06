@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -31,20 +33,32 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Update versions from git tag
+      - name: Verify version consistency
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          PACKAGE_VERSION=$(jq -r '.version' package.json)
+          PLUGIN_VERSION=$(jq -r '.info.version' src/plugin.json)
+
+          if [ "$PACKAGE_VERSION" != "$VERSION" ]; then
+            echo "ERROR: package.json version ($PACKAGE_VERSION) doesn't match tag ($VERSION)"
+            echo "Please update package.json version before tagging"
+            exit 1
+          fi
+
+          if [ "$PLUGIN_VERSION" != "$VERSION" ]; then
+            echo "ERROR: plugin.json version ($PLUGIN_VERSION) doesn't match tag ($VERSION)"
+            echo "Please update src/plugin.json version before tagging"
+            exit 1
+          fi
+
+          echo "Version consistency verified: $VERSION"
+
+      - name: Update release date in plugin.json
+        run: |
           TODAY=$(date +%Y-%m-%d)
-
-          # Update plugin.json
-          jq --arg v "$VERSION" --arg d "$TODAY" '.info.version = $v | .info.updated = $d' src/plugin.json > src/plugin.json.tmp
+          jq --arg d "$TODAY" '.info.updated = $d' src/plugin.json > src/plugin.json.tmp
           mv src/plugin.json.tmp src/plugin.json
-
-          # Update package.json
-          jq --arg v "$VERSION" '.version = $v' package.json > package.json.tmp
-          mv package.json.tmp package.json
-
-          echo "Updated version to $VERSION (date: $TODAY)"
+          echo "Updated release date to $TODAY"
 
       - name: Install frontend dependencies
         run: npm ci
@@ -74,29 +88,47 @@ jobs:
 
       - name: Package plugin
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Create main multi-platform package
           mkdir -p gizmodata-gizmosql-datasource
           cp -r dist/* gizmodata-gizmosql-datasource/
-          zip -r gizmodata-gizmosql-datasource-${{ steps.version.outputs.version }}.zip gizmodata-gizmosql-datasource
+          cp LICENSE gizmodata-gizmosql-datasource/
+          cp CHANGELOG.md gizmodata-gizmosql-datasource/
+          cp go.mod gizmodata-gizmosql-datasource/
+          cp go.sum gizmodata-gizmosql-datasource/
+          zip -r "gizmodata-gizmosql-datasource-${VERSION}.zip" gizmodata-gizmosql-datasource
 
-          # Also create platform-specific packages
+          # Create platform-specific packages
           for platform in linux_amd64 linux_arm64 darwin_amd64 darwin_arm64; do
             mkdir -p "gizmodata-gizmosql-datasource-${platform}"
             cp dist/module.js dist/module.js.map dist/plugin.json dist/README.md "gizmodata-gizmosql-datasource-${platform}/"
             cp -r dist/img "gizmodata-gizmosql-datasource-${platform}/"
             cp "dist/gpx_gizmosql_datasource_${platform}" "gizmodata-gizmosql-datasource-${platform}/"
-            zip -r "gizmodata-gizmosql-datasource-${{ steps.version.outputs.version }}-${platform}.zip" "gizmodata-gizmosql-datasource-${platform}"
+            cp LICENSE "gizmodata-gizmosql-datasource-${platform}/"
+            cp CHANGELOG.md "gizmodata-gizmosql-datasource-${platform}/"
+            cp go.mod go.sum "gizmodata-gizmosql-datasource-${platform}/"
+            zip -r "gizmodata-gizmosql-datasource-${VERSION}-${platform}.zip" "gizmodata-gizmosql-datasource-${platform}"
           done
 
-          # Windows
+          # Windows package
           mkdir -p "gizmodata-gizmosql-datasource-windows_amd64"
           cp dist/module.js dist/module.js.map dist/plugin.json dist/README.md "gizmodata-gizmosql-datasource-windows_amd64/"
           cp -r dist/img "gizmodata-gizmosql-datasource-windows_amd64/"
           cp "dist/gpx_gizmosql_datasource_windows_amd64.exe" "gizmodata-gizmosql-datasource-windows_amd64/"
-          zip -r "gizmodata-gizmosql-datasource-${{ steps.version.outputs.version }}-windows_amd64.zip" "gizmodata-gizmosql-datasource-windows_amd64"
+          cp LICENSE "gizmodata-gizmosql-datasource-windows_amd64/"
+          cp CHANGELOG.md "gizmodata-gizmosql-datasource-windows_amd64/"
+          cp go.mod go.sum "gizmodata-gizmosql-datasource-windows_amd64/"
+          zip -r "gizmodata-gizmosql-datasource-${VERSION}-windows_amd64.zip" "gizmodata-gizmosql-datasource-windows_amd64"
 
       - name: Generate checksums
         run: |
           sha256sum gizmodata-gizmosql-datasource-*.zip > checksums.txt
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'gizmodata-gizmosql-datasource-*.zip'
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
