@@ -46,7 +46,7 @@ cd grafana-gizmosql-source
 npm install
 npm run build
 
-# Build the backend (requires Go 1.22+)
+# Build the backend (requires Go 1.25+)
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_linux_arm64 ./pkg
 # Or for Linux amd64:
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/gpx_gizmosql_datasource_linux_amd64 ./pkg
@@ -188,8 +188,8 @@ The plugin includes two sample dashboards that demonstrate its capabilities:
 
 ### Prerequisites
 
-- Node.js >= 20
-- Go >= 1.22
+- Node.js >= 22
+- Go >= 1.25
 - Docker & Docker Compose (for testing)
 
 ### Build Commands
