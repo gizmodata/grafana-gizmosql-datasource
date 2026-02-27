@@ -5,16 +5,19 @@ All notable changes to the GizmoSQL Grafana Data Source Plugin will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0] - 2026-02-27
+## [1.8.0] - 2026-02-27
+
+### Added
+- Catalog-facing README in src/ for Grafana plugin catalog display
+- Plugin signing in release workflow via GRAFANA_ACCESS_POLICY_TOKEN
+- CLAUDE.md with project guidelines and best practices
 
 ### Changed
 - Upgrade grafana-plugin-sdk-go from v0.250.0 to v0.290.0
+- Update create-plugin from 6.6.0 to 7.0.0
 - Update Go version requirement to 1.25
 - Update Node.js version in CI workflows to 22
-- Update CI workflow Go version to 1.25 to match go.mod
-
-### Added
-- CLAUDE.md with project guidelines and best practices
+- CI and Build workflows now skip on tag pushes (only Release runs)
 
 ## [1.6.0] - 2026-01-06
 
@@ -163,7 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alerting support
 - Annotations support
 
-[1.7.0]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.7.0
+[1.8.0]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.8.0
 [1.6.0]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.6.0
 [1.5.6]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.5.6
 [1.5.5]: https://github.com/gizmodata/grafana-gizmosql-datasource/releases/tag/v1.5.5
