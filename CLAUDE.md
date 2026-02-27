@@ -49,7 +49,11 @@ docker compose down     # Stop
 ### Grafana Plugin Compliance
 - Keep `grafana-plugin-sdk-go` up to date (must not be older than 5 months)
 - Keep `@grafana/data` and `@grafana/ui` dependencies current
-- Ensure `plugin.json` version matches `package.json` version
+- **Version sync is critical**: when releasing, the version must match in ALL of these:
+  - `src/plugin.json` (`info.version`)
+  - `package.json` (`version`)
+  - Git tag (e.g. `v1.7.0`)
+  - `CHANGELOG.md` (new entry at top)
 - CI workflow Go/Node versions must match `go.mod` and `.nvmrc`
 - All referenced assets (logos, screenshots) must exist in `img/`
 - LICENSE, README.md, and CHANGELOG.md must be present
