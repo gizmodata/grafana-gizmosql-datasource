@@ -79,5 +79,8 @@
     "react-dom": "^18.3.0",
     "tslib": "^2.6.2"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "overrides": {
+    "serialize-javascript": "^7.0.5"
+  }
 }

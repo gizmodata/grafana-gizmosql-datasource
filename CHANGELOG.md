@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   template variables
 - Fix webpack config loading error (TS5095) with @grafana/tsconfig >=2.1 by
   overriding ts-node moduleResolution in tsconfig.json
+- Override transitive serialize-javascript to 7.0.7 (GHSA-5c6j-r48x-rmvq,
+  GHSA-qj8w-gfj5-8c6v) to pass the plugin build security scan
 
 ### Changed
 - Backend now connects via the official GizmoSQL ADBC Go driver
