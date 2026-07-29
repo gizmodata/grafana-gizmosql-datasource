@@ -20,6 +20,8 @@ export const defaultQuery: Partial<GizmoSQLQuery> = {
  * Configuration options saved in the data source settings
  */
 export interface GizmoSQLDataSourceOptions extends DataSourceJsonData {
+  /** Full gizmosql:// connection URI; when set, host/port/useTLS are ignored */
+  uri?: string;
   host?: string;
   port?: number;
   username?: string;

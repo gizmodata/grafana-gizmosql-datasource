@@ -1,3 +1,15 @@
 {
-  "extends": "./.config/tsconfig.json"
+  "extends": "./.config/tsconfig.json",
+  // @grafana/tsconfig >=2.1 sets moduleResolution "bundler", which conflicts with
+  // the scaffold's ts-node "module": "commonjs" override when webpack-cli loads
+  // the TS webpack config (TS5095) — so moduleResolution must be overridden too.
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "moduleResolution": "node10",
+      "target": "es5",
+      "esModuleInterop": true
+    },
+    "transpileOnly": true
+  }
 }

@@ -40,6 +40,7 @@ A Grafana data source plugin that connects to [GizmoSQL](https://github.com/gizm
 
 | Setting | Description | Default |
 |---------|-------------|---------|
+| Connection URI | Full `gizmosql://` URI (TLS by default, `?transport=tcp` for plaintext); overrides Host/Port/Use TLS | - |
 | Host | GizmoSQL server hostname | `localhost` |
 | Port | Flight SQL port | `31337` |
 | Use TLS | Enable TLS encryption | `false` |

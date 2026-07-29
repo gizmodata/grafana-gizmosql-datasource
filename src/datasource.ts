@@ -1,14 +1,27 @@
 import {
   DataSourceInstanceSettings,
+  DataSourceVariableSupport,
   CoreApp,
   ScopedVars,
 } from '@grafana/data';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { GizmoSQLDataSourceOptions, GizmoSQLQuery, defaultQuery } from './types';
 
+/**
+ * Enables Query variables using the plugin's own query editor: the variable
+ * query runs through the normal backend query path and Grafana maps the
+ * resulting frame to variable options (first field, or __text/__value fields).
+ */
+class GizmoSQLVariableSupport extends DataSourceVariableSupport<DataSource, GizmoSQLQuery, GizmoSQLDataSourceOptions> {
+  getDefaultQuery(): Partial<GizmoSQLQuery> {
+    return defaultQuery;
+  }
+}
+
 export class DataSource extends DataSourceWithBackend<GizmoSQLQuery, GizmoSQLDataSourceOptions> {
   constructor(instanceSettings: DataSourceInstanceSettings<GizmoSQLDataSourceOptions>) {
     super(instanceSettings);
+    this.variables = new GizmoSQLVariableSupport();
   }
 
   /**
@@ -33,7 +46,7 @@ export class DataSource extends DataSourceWithBackend<GizmoSQLQuery, GizmoSQLDat
   /**
    * Custom variable interpolation for SQL queries
    */
-  interpolateVariable(value: string | string[], variable: { multi?: boolean; includeAll?: boolean }): string {
+  interpolateVariable = (value: string | string[], variable: { multi?: boolean; includeAll?: boolean }): string => {
     if (typeof value === 'string') {
       return this.quoteLiteral(value);
     }
@@ -43,7 +56,7 @@ export class DataSource extends DataSourceWithBackend<GizmoSQLQuery, GizmoSQLDat
     }
 
     return String(value);
-  }
+  };
 
   /**
    * Quote a string literal for SQL

@@ -9,6 +9,16 @@ export function ConfigEditor(props: Props) {
   const { onOptionsChange, options } = props;
   const { jsonData, secureJsonFields, secureJsonData } = options;
 
+  const onUriChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        uri: event.target.value,
+      },
+    });
+  };
+
   const onHostChange = (event: ChangeEvent<HTMLInputElement>) => {
     onOptionsChange({
       ...options,
@@ -110,7 +120,19 @@ export function ConfigEditor(props: Props) {
   return (
     <>
       <FieldSet label="Connection">
-        <InlineField label="Host" labelWidth={14} tooltip="GizmoSQL server hostname or IP address">
+        <InlineField
+          label="Connection URI"
+          labelWidth={14}
+          tooltip="Full gizmosql:// connection URI (TLS by default, ?transport=tcp for plaintext). When set, Host, Port, and Use TLS are ignored."
+        >
+          <Input
+            width={40}
+            value={jsonData.uri || ''}
+            onChange={onUriChange}
+            placeholder="gizmosql://host:31337 (optional)"
+          />
+        </InlineField>
+        <InlineField label="Host" labelWidth={14} tooltip="GizmoSQL server hostname or IP address" disabled={!!jsonData.uri}>
           <Input
             width={40}
             value={jsonData.host || ''}
@@ -118,7 +140,7 @@ export function ConfigEditor(props: Props) {
             placeholder="localhost"
           />
         </InlineField>
-        <InlineField label="Port" labelWidth={14} tooltip="GizmoSQL Flight SQL port (default: 31337)">
+        <InlineField label="Port" labelWidth={14} tooltip="GizmoSQL Flight SQL port (default: 31337)" disabled={!!jsonData.uri}>
           <Input
             width={20}
             type="number"
@@ -127,10 +149,10 @@ export function ConfigEditor(props: Props) {
             placeholder="31337"
           />
         </InlineField>
-        <InlineField label="Use TLS" labelWidth={14} tooltip="Enable TLS/SSL encryption">
+        <InlineField label="Use TLS" labelWidth={14} tooltip="Enable TLS/SSL encryption" disabled={!!jsonData.uri}>
           <Switch value={jsonData.useTLS || false} onChange={onTLSChange} />
         </InlineField>
-        {jsonData.useTLS && (
+        {(jsonData.useTLS || !!jsonData.uri) && (
           <InlineField label="Skip TLS Verify" labelWidth={14} tooltip="Skip TLS certificate verification (not recommended for production)">
             <Switch value={jsonData.skipTLSVerify || false} onChange={onSkipTLSVerifyChange} />
           </InlineField>

@@ -2,24 +2,20 @@ package plugin
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/apache/arrow-adbc/go/adbc"
+	adbcflightsql "github.com/apache/arrow-adbc/go/adbc/driver/flightsql"
 	"github.com/apache/arrow-go/v18/arrow"
 	"github.com/apache/arrow-go/v18/arrow/array"
-	"github.com/apache/arrow-go/v18/arrow/flight"
-	"github.com/apache/arrow-go/v18/arrow/flight/flightsql"
 	"github.com/apache/arrow-go/v18/arrow/memory"
+	"github.com/gizmodata/gizmosql-adbc/go/gizmosql"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 )
 
 // Make sure Datasource implements required interfaces
@@ -31,6 +27,9 @@ var (
 
 // DatasourceSettings holds the parsed data source settings
 type DatasourceSettings struct {
+	// URI is a full gizmosql:// connection URI; when set, Host/Port/UseTLS
+	// are ignored (SkipTLSVerify still applies)
+	URI           string `json:"uri"`
 	Host          string `json:"host"`
 	Port          int    `json:"port"`
 	Username      string `json:"username"`
@@ -132,60 +131,63 @@ func (d *Datasource) replaceMacros(sql string, timeRange backend.TimeRange) stri
 	return sql
 }
 
-// executeFlightSQL connects to GizmoSQL and executes the query
+// executeFlightSQL connects to GizmoSQL via the GizmoSQL ADBC driver and
+// executes the query
 func (d *Datasource) executeFlightSQL(ctx context.Context, sql string) (*data.Frame, error) {
-	addr := fmt.Sprintf("%s:%d", d.settings.Host, d.settings.Port)
-
-	// Set up transport credentials
-	var creds credentials.TransportCredentials
-	if d.settings.UseTLS {
-		tlsConfig := &tls.Config{
-			InsecureSkipVerify: d.settings.SkipTLSVerify,
+	uri := strings.TrimSpace(d.settings.URI)
+	if uri == "" {
+		transport := "tcp"
+		if d.settings.UseTLS {
+			transport = "tls"
 		}
-		creds = credentials.NewTLS(tlsConfig)
-	} else {
-		creds = insecure.NewCredentials()
+		uri = fmt.Sprintf("gizmosql://%s:%d?transport=%s", d.settings.Host, d.settings.Port, transport)
 	}
 
-	// Create Flight SQL client
-	client, err := flightsql.NewClient(addr, nil, nil, grpc.WithTransportCredentials(creds))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Flight SQL client: %w", err)
+	opts := map[string]string{
+		"uri": uri,
 	}
-	defer client.Close()
 
-	// Authenticate using Basic Auth if credentials provided
 	if d.password != "" {
 		username := d.settings.Username
 		if username == "" {
 			username = "gizmosql" // default username
 		}
-		authCtx, err := client.Client.AuthenticateBasicToken(ctx, username, d.password)
-		if err != nil {
-			return nil, fmt.Errorf("authentication failed: %w", err)
-		}
-		ctx = authCtx
+		opts[adbc.OptionKeyUsername] = username
+		opts[adbc.OptionKeyPassword] = d.password
 	} else if d.token != "" {
-		// For bearer token auth, add to metadata
-		ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+d.token)
+		opts[adbcflightsql.OptionAuthorizationHeader] = "Bearer " + d.token
 	}
 
-	// Execute query
-	info, err := client.Execute(ctx, sql)
+	if d.settings.SkipTLSVerify && (d.settings.UseTLS || d.settings.URI != "") {
+		opts[adbcflightsql.OptionSSLSkipVerify] = adbc.OptionValueEnabled
+	}
+
+	drv := gizmosql.NewDriver(memory.DefaultAllocator)
+	db, err := drv.NewDatabaseWithContext(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GizmoSQL database handle: %w", err)
+	}
+	defer db.Close()
+
+	cnxn, err := db.Open(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to GizmoSQL: %w", err)
+	}
+	defer cnxn.Close()
+
+	stmt, err := cnxn.NewStatement()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create statement: %w", err)
+	}
+	defer stmt.Close()
+
+	if err := stmt.SetSqlQuery(sql); err != nil {
+		return nil, fmt.Errorf("failed to set query: %w", err)
+	}
+
+	reader, _, err := stmt.ExecuteQuery(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
-	}
-
-	// Get result data
-	if len(info.Endpoint) == 0 {
-		// No data returned, create empty frame
-		return data.NewFrame("result"), nil
-	}
-
-	// Read from the first endpoint
-	reader, err := client.DoGet(ctx, info.Endpoint[0].Ticket)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get query results: %w", err)
 	}
 	defer reader.Release()
 
@@ -194,7 +196,7 @@ func (d *Datasource) executeFlightSQL(ctx context.Context, sql string) (*data.Fr
 }
 
 // arrowReaderToFrame converts an Arrow record reader to a Grafana data frame
-func (d *Datasource) arrowReaderToFrame(reader *flight.Reader) (*data.Frame, error) {
+func (d *Datasource) arrowReaderToFrame(reader array.RecordReader) (*data.Frame, error) {
 	alloc := memory.NewGoAllocator()
 	frame := data.NewFrame("result")
 

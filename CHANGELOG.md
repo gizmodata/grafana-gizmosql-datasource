@@ -5,6 +5,33 @@ All notable changes to the GizmoSQL Grafana Data Source Plugin will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-07-29
+
+### Added
+- Optional Connection URI setting: paste a full `gizmosql://` URI (TLS by
+  default, `?transport=tcp` for plaintext) instead of Host/Port/Use TLS
+- Query variable support: the SQL query editor now appears when using GizmoSQL
+  as a dashboard variable data source, and variable queries execute through the
+  backend (fixes "Could not create a runner for datasource") (#1)
+
+### Fixed
+- Fix `this` binding crash in variable interpolation when using multi-value
+  template variables
+- Fix webpack config loading error (TS5095) with @grafana/tsconfig >=2.1 by
+  overriding ts-node moduleResolution in tsconfig.json
+
+### Changed
+- Backend now connects via the official GizmoSQL ADBC Go driver
+  (github.com/gizmodata/gizmosql-adbc/go) using `gizmosql://` URIs instead of
+  hand-rolled Arrow Flight SQL client code; existing data source settings are
+  unchanged
+- Upgrade grafana-plugin-sdk-go from v0.290.0 to v0.294.0 (requires Go 1.26)
+- Upgrade apache/arrow-go from v18.5.1 to v18.7.0 and grpc to v1.82.1
+- Update Go version in CI workflows to 1.26.5 to match go.mod
+- Update npm dependencies within semver ranges (@grafana/* 12.4.6, etc.)
+- Update GitHub Actions to current majors: checkout v7, setup-node v7,
+  setup-go v7, upload-artifact v7, grafana/plugin-actions build-plugin v1.2.0
+
 ## [1.8.0] - 2026-02-27
 
 ### Added
